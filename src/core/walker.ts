@@ -71,19 +71,76 @@ function toRelativeRect(rootRect: DOMRect, rect: DOMRect): SkeletonRect {
   };
 }
 
-function containsRect(outer: SkeletonRect, inner: SkeletonRect): boolean {
-  const epsilon = 1;
+function isTransparentColor(value: string): boolean {
+  const normalized = value.replace(/\s+/g, "").toLowerCase();
+  if (normalized === "transparent" || normalized === "rgba(0,0,0,0)" || normalized === "hsla(0,0%,0%,0)") {
+    return true;
+  }
 
-  return (
-    outer.left - epsilon <= inner.left &&
-    outer.top - epsilon <= inner.top &&
-    outer.left + outer.width + epsilon >= inner.left + inner.width &&
-    outer.top + outer.height + epsilon >= inner.top + inner.height
-  );
+  if (normalized.startsWith("rgba(")) {
+    const parts = normalized.slice(5, -1).split(",");
+    const alpha = Number.parseFloat(parts[3] ?? "1");
+    return !Number.isNaN(alpha) && alpha <= 0;
+  }
+
+  if (normalized.startsWith("hsla(")) {
+    const parts = normalized.slice(5, -1).split(",");
+    const alpha = Number.parseFloat(parts[3] ?? "1");
+    return !Number.isNaN(alpha) && alpha <= 0;
+  }
+
+  return false;
 }
 
 function isContainerElement(node: Element): boolean {
   return CONTAINER_TAGS.has(node.tagName);
+}
+
+function hasVisualSurfaceStyle(node: Element): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const style = window.getComputedStyle(node);
+  const hasBackground = !isTransparentColor(style.backgroundColor) || style.backgroundImage !== "none";
+
+  const borderTop = Number.parseFloat(style.borderTopWidth || "0");
+  const borderRight = Number.parseFloat(style.borderRightWidth || "0");
+  const borderBottom = Number.parseFloat(style.borderBottomWidth || "0");
+  const borderLeft = Number.parseFloat(style.borderLeftWidth || "0");
+
+  const hasBorder =
+    (borderTop > 0 && !isTransparentColor(style.borderTopColor)) ||
+    (borderRight > 0 && !isTransparentColor(style.borderRightColor)) ||
+    (borderBottom > 0 && !isTransparentColor(style.borderBottomColor)) ||
+    (borderLeft > 0 && !isTransparentColor(style.borderLeftColor));
+
+  const hasShadow = style.boxShadow !== "none";
+  return hasBackground || hasBorder || hasShadow;
+}
+
+function shouldRecordContainer(node: Element, rect: DOMRect, rootRect: DOMRect, depth: number): boolean {
+  if (node.hasAttribute("data-skeleton-container")) {
+    return true;
+  }
+
+  if (!isContainerElement(node) || !hasVisualSurfaceStyle(node)) {
+    return false;
+  }
+
+  const rootArea = rootRect.width * rootRect.height;
+  if (rootArea <= 0) {
+    return true;
+  }
+
+  const coverage = (rect.width * rect.height) / rootArea;
+
+  // Skip giant top-level slabs so content detail remains visible.
+  if (coverage > 0.94 && depth <= 1) {
+    return false;
+  }
+
+  return true;
 }
 
 export function walk(root: Element, options: WalkOptions = {}): SkeletonNode[] {
@@ -107,9 +164,10 @@ export function walk(root: Element, options: WalkOptions = {}): SkeletonNode[] {
 
     const type = classifyElement(node, rect);
     const leaf = isLeafElement(node);
+    const containerSurface = type === "block" && shouldRecordContainer(node, rect, rootRect, depth);
     const recordNode =
       (includeRoot || depth > 0) &&
-      (leaf || type !== "block" || hasMeaningfulText(node) || isContainerElement(node));
+      (leaf || type !== "block" || hasMeaningfulText(node) || containerSurface);
 
     if (recordNode) {
       nodes.push({

@@ -62,12 +62,11 @@ export function useSkeletonAuto(options: UseSkeletonAutoOptions = {}): UseSkelet
         return;
       }
 
+      let cachedSnapshot: SkeletonNode[] | undefined;
       if (snapshot && !forceRefresh) {
-        const cached = getSnapshot(snapshot);
-        if (cached && cached.length > 0) {
-          setNodes(cached);
-          markReady();
-          return;
+        cachedSnapshot = getSnapshot(snapshot);
+        if (cachedSnapshot && cachedSnapshot.length > 0) {
+          setNodes(cachedSnapshot);
         }
       }
 
@@ -78,13 +77,16 @@ export function useSkeletonAuto(options: UseSkeletonAutoOptions = {}): UseSkelet
       });
 
       if (snapshot) {
-        const previous = getSnapshot(snapshot);
+        const previous = cachedSnapshot ?? getSnapshot(snapshot);
         if (!previous || hasSkeletonDiff(previous, nextNodes)) {
           setSnapshot(snapshot, nextNodes);
         }
       }
 
-      setNodes(nextNodes);
+      if (!cachedSnapshot || hasSkeletonDiff(cachedSnapshot, nextNodes)) {
+        setNodes(nextNodes);
+      }
+
       markReady();
     },
     [markReady, maxDepth, minHeight, minWidth, snapshot]
@@ -103,10 +105,26 @@ export function useSkeletonAuto(options: UseSkeletonAutoOptions = {}): UseSkelet
       generateNodes(false);
     });
 
+    const settle = () => {
+      generateNodes(true);
+    };
+
+    let settleTimer = 0;
+    if (snapshot) {
+      settleTimer = window.setTimeout(settle, 220);
+      window.addEventListener("load", settle);
+    }
+
     return () => {
       window.cancelAnimationFrame(frameId);
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+      }
+      if (snapshot) {
+        window.removeEventListener("load", settle);
+      }
     };
-  }, [generateNodes]);
+  }, [generateNodes, snapshot]);
 
   useEffect(() => {
     if (isServerEnvironment()) {

@@ -16,6 +16,14 @@ const STYLE_TEXT = `
   background: var(--skeleton-base, #e0e0e0);
 }
 
+.skeleton-auto-node--type-block {
+  opacity: 0.42;
+}
+
+.skeleton-auto-node--type-block::after {
+  display: none;
+}
+
 .skeleton-auto-node::after {
   content: "";
   position: absolute;

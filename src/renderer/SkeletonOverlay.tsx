@@ -43,6 +43,10 @@ function resolveRadius(node: SkeletonNode, fallbackRadius: number): number {
   return node.borderRadius > 0 ? node.borderRadius : fallbackRadius;
 }
 
+function nodePriority(node: SkeletonNode): number {
+  return node.type === "block" ? 0 : 1;
+}
+
 export function SkeletonOverlay({
   nodes,
   baseColor,
@@ -57,21 +61,29 @@ export function SkeletonOverlay({
   }
 
   const nodeClass = animationClass(animation);
+  const orderedNodes = [...nodes].sort((a, b) => nodePriority(a) - nodePriority(b));
 
   return (
     <div className="skeleton-auto-overlay" aria-hidden="true">
-      {nodes.map((node) => {
+      {orderedNodes.map((node) => {
         const style = {
           top: `${node.rect.top}px`,
           left: `${node.rect.left}px`,
           width: `${node.rect.width}px`,
           height: `${node.rect.height}px`,
           borderRadius: `${resolveRadius(node, borderRadius)}px`,
+          zIndex: node.type === "block" ? 0 : 1,
           "--skeleton-base": baseColor,
           "--skeleton-highlight": shimmerColor
         } as CSSProperties;
 
-        return <span key={node.id} className={`skeleton-auto-node ${nodeClass}`} style={style} />;
+        return (
+          <span
+            key={node.id}
+            className={`skeleton-auto-node skeleton-auto-node--type-${node.type} ${nodeClass}`}
+            style={style}
+          />
+        );
       })}
     </div>
   );
