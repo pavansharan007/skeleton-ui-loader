@@ -4,6 +4,14 @@
   "description": "Zero-config React skeleton loader generated from real DOM structure.",
   "author": "Pavan",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavansharan007/skeleton-ui-loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pavansharan007/skeleton-ui-loader/issues"
+  },
+  "homepage": "https://github.com/pavansharan007/skeleton-ui-loader#readme",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
