@@ -1,5 +1,5 @@
 import { classifyElement, getComputedBorderRadius, hasMeaningfulText, isLeafElement } from "./classifier";
-import { SkeletonNode, SkeletonRect, WalkOptions } from "../types";
+import { SkeletonNode, SkeletonNodeType, SkeletonRect, WalkOptions } from "../types";
 
 const DEFAULT_MAX_DEPTH = 12;
 const DEFAULT_MIN_SIZE = 2;
@@ -30,6 +30,31 @@ function normalizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim().slice(0, 30);
 }
 
+function normalizeLongText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function parsePx(value: string): number {
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+let measureContext: CanvasRenderingContext2D | null | undefined;
+
+function getTextMeasureContext(): CanvasRenderingContext2D | null {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  if (measureContext !== undefined) {
+    return measureContext;
+  }
+
+  const canvas = document.createElement("canvas");
+  measureContext = canvas.getContext("2d");
+  return measureContext;
+}
+
 function getNodeId(node: Element, path: string): string {
   const explicitId = node.getAttribute("data-skeleton-id");
   if (explicitId) {
@@ -38,6 +63,63 @@ function getNodeId(node: Element, path: string): string {
 
   const text = normalizeText(node.textContent ?? "");
   return text.length > 0 ? `${path}:${text}` : path;
+}
+
+function resolveTextLikeWidth(node: Element, type: SkeletonNodeType, rect: DOMRect): number {
+  if (type !== "text" && type !== "heading") {
+    return rect.width;
+  }
+
+  const text = normalizeLongText(node.textContent ?? "");
+  if (text.length === 0) {
+    return rect.width;
+  }
+
+  if (typeof window === "undefined") {
+    return rect.width;
+  }
+
+  const context = getTextMeasureContext();
+  if (!context) {
+    return rect.width;
+  }
+
+  const style = window.getComputedStyle(node);
+  const fontStyle = style.fontStyle || "normal";
+  const fontVariant = style.fontVariant || "normal";
+  const fontWeight = style.fontWeight || "400";
+  const fontSize = style.fontSize || "16px";
+  const fontFamily = style.fontFamily || "sans-serif";
+  context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${fontSize} ${fontFamily}`;
+
+  const measured = context.measureText(text).width;
+  const horizontalPadding = parsePx(style.paddingLeft) + parsePx(style.paddingRight);
+  const minWidth = Math.min(rect.width, type === "heading" ? 120 : 42);
+  const proposedWidth = measured + horizontalPadding + 6;
+
+  if (proposedWidth <= minWidth) {
+    return minWidth;
+  }
+
+  return Math.min(rect.width, proposedWidth);
+}
+
+function shouldRecordTextNode(node: Element, rect: DOMRect): boolean {
+  const text = normalizeLongText(node.textContent ?? "");
+  if (text.length === 0) {
+    return false;
+  }
+
+  if (rect.width < 24 || rect.height < 9) {
+    return false;
+  }
+
+  // Filter ultra-short labels that produce noisy micro-lines.
+  if (text.length <= 2 && rect.width < 80) {
+    return false;
+  }
+
+  return true;
 }
 
 function isVisible(node: Element, rect: DOMRect, minWidth: number, minHeight: number): boolean {
@@ -128,18 +210,6 @@ function shouldRecordContainer(node: Element, rect: DOMRect, rootRect: DOMRect, 
     return false;
   }
 
-  const rootArea = rootRect.width * rootRect.height;
-  if (rootArea <= 0) {
-    return true;
-  }
-
-  const coverage = (rect.width * rect.height) / rootArea;
-
-  // Skip giant top-level slabs so content detail remains visible.
-  if (coverage > 0.94 && depth <= 1) {
-    return false;
-  }
-
   return true;
 }
 
@@ -165,15 +235,23 @@ export function walk(root: Element, options: WalkOptions = {}): SkeletonNode[] {
     const type = classifyElement(node, rect);
     const leaf = isLeafElement(node);
     const containerSurface = type === "block" && shouldRecordContainer(node, rect, rootRect, depth);
+    const textLike = type === "text" || type === "heading";
+    const keepTextLike = !textLike || shouldRecordTextNode(node, rect);
     const recordNode =
       (includeRoot || depth > 0) &&
+      keepTextLike &&
       (leaf || type !== "block" || hasMeaningfulText(node) || containerSurface);
 
     if (recordNode) {
+      const relativeRect = toRelativeRect(rootRect, rect);
+      if (textLike) {
+        relativeRect.width = round(resolveTextLikeWidth(node, type, rect));
+      }
+
       nodes.push({
         id: getNodeId(node, path),
         type,
-        rect: toRelativeRect(rootRect, rect),
+        rect: relativeRect,
         borderRadius: round(getComputedBorderRadius(node, rect))
       });
     }
