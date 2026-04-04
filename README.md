@@ -2,9 +2,8 @@
 
 Zero-config React skeleton loaders generated from your real component DOM shape.
 
-🌐 **Interactive Demo & Docs:** [https://skeletonuiloader.vercel.app/](https://skeletonuiloader.vercel.app/)
+**Interactive Demo & Docs:** [https://skeletonuiloader.vercel.app/](https://skeletonuiloader.vercel.app/)
 
-Use one wrapper, keep your real markup, and get an automatic loading state that tracks your actual UI structure.
 
 ## Why use this
 
