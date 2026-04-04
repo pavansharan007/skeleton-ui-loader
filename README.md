@@ -2,6 +2,8 @@
 
 Zero-config React skeleton loaders generated from your real component DOM shape.
 
+🌐 **Interactive Demo & Docs:** [https://skeletonuiloader.vercel.app/](https://skeletonuiloader.vercel.app/)
+
 Use one wrapper, keep your real markup, and get an automatic loading state that tracks your actual UI structure.
 
 ## Why use this
@@ -91,6 +93,7 @@ Skip snapshot mode when:
 
 ```tsx
 import { useSkeletonAuto } from "skeleton-ui-loader";
+import "skeleton-ui-loader/styles.css";
 
 function ManualLoader({ loading }: { loading: boolean }) {
   const { skeletonRef, SkeletonOverlay, snap } = useSkeletonAuto({
