@@ -1,17 +1,130 @@
 # skeleton-ui-loader
 
-Zero-config React skeleton loaders generated from your real component DOM shape.
+**Zero-config React skeleton loaders generated automatically from your real component DOM.**
 
-**Interactive Demo & Docs:** [https://skeletonuiloader.vercel.app/](https://skeletonuiloader.vercel.app/)
+Stop writing skeleton markup. Wrap your component → instant, perfect skeleton. No duplication. No maintenance.
 
+[![npm](https://img.shields.io/npm/v/skeleton-ui-loader)](https://npmjs.org/skeleton-ui-loader)
+[![downloads](https://img.shields.io/npm/dm/skeleton-ui-loader)](https://npmjs.org/skeleton-ui-loader)
+[![license](https://img.shields.io/npm/l/skeleton-ui-loader)](LICENSE)
 
-## Why use this
+---
 
-- No duplicate skeleton markup to maintain.
-- Structural skeletons for containers, headings, media, controls, and content blocks.
-- Themeable colors, radius, and animation style.
-- Snapshot mode for stable repeated layouts.
-- SSR-safe fallback behavior.
+## The Problem
+
+Every React app needs skeleton loaders. But building them sucks:
+
+```tsx
+// ❌ You write this for every component
+const UserCardSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+    <div className="h-4 w-20 bg-gray-200 mt-2"></div>
+    <div className="h-3 w-32 bg-gray-200 mt-1"></div>
+  </div>
+);
+```
+
+- **Duplicate markup** everywhere
+- **Fragile** — breaks when you refactor
+- **Time-wasting** — hours per project
+- **Inconsistent** — different devs build skeletons differently
+
+---
+
+## The Solution
+
+Just wrap **ANY component or HTML element**:
+
+```tsx
+import { SkeletonAuto } from "skeleton-ui-loader";
+import "skeleton-ui-loader/styles.css";
+
+// ✅ Works with React components
+function UserCard({ loading }) {
+  return (
+    <SkeletonAuto loading={loading}>
+      <YourComponent />
+    </SkeletonAuto>
+  );
+}
+
+// ✅ Works with any HTML structure
+function Article({ loading }) {
+  return (
+    <SkeletonAuto loading={loading}>
+      <div className="article">
+        <h1>Title</h1>
+        <img src="..." alt="cover" />
+        <p>Content paragraph...</p>
+        <button>Read More</button>
+      </div>
+    </SkeletonAuto>
+  );
+}
+
+// ✅ Works with simple divs
+<SkeletonAuto loading={isLoading}>
+  <div>
+    <div className="avatar"></div>
+    <div className="name">John Doe</div>
+  </div>
+</SkeletonAuto>
+```
+
+Perfect skeleton, **zero maintenance**. Works with any div, any HTML structure.
+
+---
+
+## Works With ANYTHING
+
+```tsx
+// ✅ React components
+<SkeletonAuto loading={loading}><MyComponent /></SkeletonAuto>
+
+// ✅ HTML divs
+<SkeletonAuto loading={loading}><div>...</div></SkeletonAuto>
+
+// ✅ Nested structures
+<SkeletonAuto loading={loading}>
+  <article>
+    <h1>Title</h1>
+    <img />
+    <p>Content</p>
+  </article>
+</SkeletonAuto>
+
+// ✅ Complex layouts
+<SkeletonAuto loading={loading}>
+  <section className="card">
+    <header>
+      <img className="avatar" />
+      <h2>Name</h2>
+    </header>
+    <body>
+      <p>Description</p>
+    </body>
+    <footer>
+      <button>Action</button>
+    </footer>
+  </section>
+</SkeletonAuto>
+```
+
+**One wrapper.** Any content inside. Perfect skeleton.
+
+---
+
+## Why skeleton-ui-loader
+
+✨ **Works with ANY HTML** — React components, divs, complex layouts, anything  
+🤖 **Auto-generated** — Scans real DOM, creates perfect skeleton  
+🎨 **Themeable** — Colors, radius, animations fully customizable  
+⚡ **Performant** — Snapshot mode caches layouts for repeat renders  
+🔄 **SSR-safe** — Works with Next.js, Remix, any React framework  
+⌨️ **TypeScript** — Full type safety & IntelliSense  
+
+---
 
 ## Install
 
@@ -19,222 +132,319 @@ Zero-config React skeleton loaders generated from your real component DOM shape.
 npm i skeleton-ui-loader
 ```
 
-React peer requirements:
+**Requires:**
+- React ≥ 17
+- react-dom ≥ 17
 
-- react >= 17
-- react-dom >= 17
+---
 
-## Quick start
+## 30-Second Setup
+
+Wrap **any component or HTML element**. Skeleton generates automatically.
 
 ```tsx
 import { SkeletonAuto } from "skeleton-ui-loader";
 import "skeleton-ui-loader/styles.css";
 
-function UserCardLoader({ loading }: { loading: boolean }) {
+export function MyComponent() {
+  const [loading, setLoading] = useState(true);
+
   return (
-    <SkeletonAuto loading={loading}>
-      <UserCard />
+    <SkeletonAuto loading={loading} animation="shimmer">
+      {/* Works with React components, divs, any HTML */}
+      <YourComponent />
     </SkeletonAuto>
   );
 }
 ```
 
-Notes:
+**That's all.** Skeleton auto-generates from ANY div or HTML element inside.
 
-- The package auto-injects styles at runtime.
-- Importing `skeleton-ui-loader/styles.css` is optional but recommended for explicit styling control.
+---
 
-## Component usage
+## API
+
+### `<SkeletonAuto />`
+
+Wrap any component. Skeleton generates automatically.
 
 ```tsx
 <SkeletonAuto
   loading={isLoading}
-  baseColor="#2b2f36"
-  shimmerColor="#3a404a"
-  borderRadius={12}
-  animation="shimmer"
-  snapshot="user-card-v1"
+  baseColor="#2b2f36"        // Skeleton background
+  shimmerColor="#3a404a"     // Animation highlight
+  borderRadius={12}          // Corner radius
+  animation="shimmer"        // shimmer | pulse | wave | none
+  snapshot="user-card-v1"    // Optional: cache layout
 >
-  <UserCard />
+  <YourComponent />
 </SkeletonAuto>
 ```
 
-### Animations
+| Prop | Type | Default | What it does |
+|------|------|---------|---|
+| `loading` | `boolean` | required | Show skeleton when true |
+| `children` | `ReactNode` | required | Component to scan |
+| `baseColor` | `string` | `#e0e0e0` | Skeleton color |
+| `shimmerColor` | `string` | `#f0f0f0` | Animation highlight |
+| `animation` | `"shimmer" \| "pulse" \| "wave" \| "none"` | `"shimmer"` | Animation style |
+| `borderRadius` | `number` | `4` | Corner radius |
+| `snapshot` | `string` | — | Cache key (optional) |
+| `maxDepth` | `number` | `12` | DOM traversal depth |
+| `minWidth` | `number` | `2` | Skip elements narrower than this |
+| `minHeight` | `number` | `2` | Skip elements shorter than this |
 
-Supported values:
+---
 
-- `"shimmer"` (default)
-- `"pulse"`
-- `"wave"`
-- `"none"`
-
-## Snapshot mode
-
-Snapshot mode caches measured skeleton nodes by key.
-
-```tsx
-<SkeletonAuto loading={loading} snapshot="billing-card">
-  <BillingCard />
-</SkeletonAuto>
-```
-
-Use snapshot mode when:
-
-- The layout is mostly stable.
-- The component is shown frequently.
-
-Skip snapshot mode when:
-
-- The component structure changes often.
-- The same key can represent very different layouts.
-
-## Hook API (manual control)
+### `useSkeletonAuto()` — For Custom Control
 
 ```tsx
 import { useSkeletonAuto } from "skeleton-ui-loader";
-import "skeleton-ui-loader/styles.css";
 
-function ManualLoader({ loading }: { loading: boolean }) {
+function ManualMode() {
   const { skeletonRef, SkeletonOverlay, snap } = useSkeletonAuto({
     animation: "wave",
     baseColor: "#1f2a39",
     shimmerColor: "#32445b",
-    borderRadius: 12,
-    snapshot: "manual-card"
+    borderRadius: 12
   });
 
   return (
     <div style={{ position: "relative" }}>
-      <div ref={skeletonRef} style={loading ? { opacity: 0.001, pointerEvents: "none" } : undefined}>
-        <CardContent />
+      <div ref={skeletonRef} style={loading ? { opacity: 0.001 } : {}}>
+        <YourContent />
       </div>
-
-      {loading ? <SkeletonOverlay /> : null}
-
-      <button type="button" onClick={snap}>
-        Re-scan layout
-      </button>
+      {loading && <SkeletonOverlay />}
+      <button onClick={snap}>Refresh layout</button>
     </div>
   );
 }
 ```
 
-## Advanced control attributes
+---
 
-### `data-skeleton-id`
+## How It Works
 
-Attach a stable identity to improve snapshot matching.
+**The Magic:**
+
+1. **Scans** your real component's DOM
+2. **Classifies** elements (headings, images, text, buttons)
+3. **Generates** a perfect skeleton matching that structure
+4. **Animates** with shimmer, pulse, wave, or static
+5. **Caches** layouts (optional) for performance
+
+**Classification:**
+
+| Element Type | Skeleton |
+|---|---|
+| `<h1>` ... `<h6>` | Heading bar |
+| `<img>`, `<picture>` | Image placeholder |
+| `<button>`, `<input>` | Control shape |
+| Text nodes | Content bars |
+| Containers | Structural blocks |
+
+---
+
+## Advanced Features
+
+### Snapshot Mode (Caching)
+
+Use `snapshot` to cache layouts for components shown repeatedly:
 
 ```tsx
-<article data-skeleton-id="user-card-root">...</article>
+<SkeletonAuto loading={loading} snapshot="product-card-v1">
+  <ProductCard />
+</SkeletonAuto>
 ```
 
-### `data-skeleton-container`
+**When to use:**
+- Component layout is stable
+- Shows frequently (list of 100 items)
 
-Force a container surface to be represented as a structural skeleton block.
+**When to skip:**
+- Layout changes often
+- Dynamic content structure
+
+---
+
+### Fine-Tune with Data Attributes
+
+**Mark key elements:**
 
 ```tsx
-<section data-skeleton-container="true">...</section>
+<article data-skeleton-id="user-card-root">
+  <div data-skeleton-container="true">
+    {/* Mark container surfaces for better skeletons */}
+  </div>
+</article>
 ```
 
-Useful for card surfaces, panels, or grouped blocks where container shape matters.
+| Attribute | Purpose |
+|---|---|
+| `data-skeleton-id` | Stable identity for snapshot matching |
+| `data-skeleton-container` | Force container to be structural block |
 
-## API reference
+---
 
-### `SkeletonAuto` props
+### Customize Depth & Granularity
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `loading` | `boolean` | required | Enables skeleton overlay when `true`. |
-| `children` | `ReactNode` | required | Real content used for layout measurement. |
-| `baseColor` | `string` | `#e0e0e0` | Base skeleton color. |
-| `shimmerColor` | `string` | `#f0f0f0` | Highlight color used by shimmer/wave. |
-| `animation` | `"shimmer" \| "pulse" \| "wave" \| "none"` | `"shimmer"` | Skeleton animation type. |
-| `borderRadius` | `number` | `4` | Fallback corner radius for skeleton nodes. |
-| `snapshot` | `string` | `undefined` | Cache key for snapshot mode. |
-| `maxDepth` | `number` | `12` | DOM traversal depth limit. |
-| `minWidth` | `number` | `2` | Minimum node width to include. |
-| `minHeight` | `number` | `2` | Minimum node height to include. |
-| `onReady` | `() => void` | `undefined` | Called when nodes are generated. |
-| `className` | `string` | `undefined` | Wrapper class name. |
-| `style` | `CSSProperties` | `undefined` | Wrapper inline style. |
+```tsx
+<SkeletonAuto
+  maxDepth={8}      // Stop at 8 levels deep
+  minWidth={10}     // Skip elements <10px wide
+  minHeight={3}     // Skip elements <3px tall
+>
+  <Component />
+</SkeletonAuto>
+```
 
-### `useSkeletonAuto(options)`
+**Fix noisy skeletons:** Increase `minWidth` and `minHeight`.
 
-Options:
+---
 
-- `baseColor?: string`
-- `shimmerColor?: string`
-- `borderRadius?: number`
-- `animation?: SkeletonAnimation`
-- `snapshot?: string`
-- `maxDepth?: number`
-- `minWidth?: number`
-- `minHeight?: number`
-- `onReady?: () => void`
+## Animation Styles
 
-Return:
+4 built-in animations:
 
-- `skeletonRef: RefObject<HTMLDivElement>`
-- `SkeletonOverlay: () => ReactElement | null`
-- `snap: () => void`
-- `ready: boolean`
-- `nodes: SkeletonNode[]`
+| Animation | Effect |
+|---|---|
+| `shimmer` | ✨ Light wave across skeleton (default) |
+| `pulse` | 💫 Fade in/out smoothly |
+| `wave` | 〰️ Directional highlight sweep |
+| `none` | ⏸️ Static (no animation) |
 
-### Utility exports
+```tsx
+<SkeletonAuto animation="pulse">
+  <Component />
+</SkeletonAuto>
+```
 
-- `clearSnapshot(key?: string)`
-- `getSnapshot(key: string)`
-- `setSnapshot(key: string, nodes: SkeletonNode[])`
-- `hasSkeletonDiff(previous, next, tolerance?)`
-- `walk(root, options?)`
-- `classifyElement(element, rect)`
+---
 
-## Classification behavior (high level)
+## Common Patterns
 
-- Headings (`h1`-`h6`) -> heading skeletons
-- Media (`img`, `figure`, `picture`, etc.) -> image skeletons
-- Buttons and inputs -> control-shaped skeletons
-- Icons and compact symbolic elements -> icon skeletons
-- Styled container surfaces -> structural block skeletons
-- Text-like nodes -> content bars with estimated line width
+### Loading a List
 
-## SSR behavior
+```tsx
+<ScrollRevealList>
+  {items.map((item) => (
+    <SkeletonAuto key={item.id} loading={loading}>
+      <Card item={item} />
+    </SkeletonAuto>
+  ))}
+</ScrollRevealList>
+```
 
-- On server: renders a generic placeholder fallback.
-- On client mount: measures real layout and hydrates into real skeleton nodes.
+### Dark Mode Support
 
-## Performance tips
+```tsx
+<SkeletonAuto
+  loading={loading}
+  baseColor={isDark ? "#1a1a1a" : "#e0e0e0"}
+  shimmerColor={isDark ? "#333" : "#f0f0f0"}
+>
+  <Component />
+</SkeletonAuto>
+```
 
-- Use `snapshot` for repeated stable UI patterns.
-- Use `data-skeleton-id` on key containers for reliable identity.
-- Set `maxDepth` lower on very deep trees.
-- Raise `minWidth` and `minHeight` to skip micro nodes.
+### Custom Styling
+
+```tsx
+<SkeletonAuto
+  loading={loading}
+  className="my-skeleton"
+  style={{ borderRadius: "16px" }}
+>
+  <Component />
+</SkeletonAuto>
+```
+
+---
 
 ## Troubleshooting
 
-### Skeleton is too noisy
+### "Skeleton looks wrong / too noisy"
 
-- Increase `minWidth` and `minHeight`.
-- Use `data-skeleton-container` only on key structural wrappers.
+**Solution:** Increase `minWidth` and `minHeight`
 
-### Skeleton looks stale with snapshot mode
-
-- Change snapshot key when structure changes.
-- Call `clearSnapshot("your-key")` before next render.
-
-### Skeleton does not match a special section
-
-- Add `data-skeleton-id` for stable matching.
-- Add `data-skeleton-container` on important visual surfaces.
-
-## Development
-
-```bash
-npm run build
-npm run typecheck
+```tsx
+<SkeletonAuto minWidth={12} minHeight={8}>
+  <Component />
+</SkeletonAuto>
 ```
+
+### "Snapshot looks stale"
+
+**Solution:** Change snapshot key when structure changes
+
+```tsx
+// Old: snapshot="card-v1"
+// New: snapshot="card-v2"  ← Different key = fresh cache
+```
+
+Or clear snapshot:
+
+```tsx
+import { clearSnapshot } from "skeleton-ui-loader";
+
+clearSnapshot("card-v1");  // Clear one
+clearSnapshot();           // Clear all
+```
+
+### "Skeleton doesn't match special sections"
+
+**Solution:** Use `data-skeleton-id` and `data-skeleton-container`
+
+```tsx
+<section data-skeleton-id="hero-section" data-skeleton-container="true">
+  <Component />
+</section>
+```
+
+---
+
+
+## Performance Tips
+
+💡 **Use `snapshot`** for stable layouts shown 5+ times  
+💡 **Set `maxDepth` lower** on very deep component trees  
+💡 **Raise `minWidth`/`minHeight`** to skip micro-elements  
+💡 **Use `data-skeleton-id`** on key containers for reliable matching
+
+**Bundle size:** Only 3KB. Zero runtime dependencies.
+
+---
+
+## Utility Exports
+
+Advanced use cases:
+
+```tsx
+import {
+  clearSnapshot,        // Clear cache
+  getSnapshot,         // Read cached layout
+  setSnapshot,         // Set custom layout
+  hasSkeletonDiff,     // Detect layout changes
+  walk,               // Traverse DOM tree
+  classifyElement     // Classify single element
+} from "skeleton-ui-loader";
+```
+
+---
 
 ## License
 
-MIT
+MIT — Use freely in personal & commercial projects.
+
+---
+
+## Next Steps
+
+- 📖 **[Read Full Docs](https://github.com/pavansharan007/skeleton-ui-loader)**
+- 🎮 **[Try Live Demo](https://skeletonuiloader.vercel.app/)**
+- 💬 **[GitHub Issues](https://github.com/pavansharan007/skeleton-ui-loader/issues)** for bugs or ideas
+- ⭐ **[Star on GitHub](https://github.com/pavansharan007/skeleton-ui-loader)** if this saved you time
+
+---
+
+Made by [Pavan](https://github.com/pavansharan007)  
