@@ -440,7 +440,6 @@ MIT — Use freely in personal & commercial projects.
 
 ## Next Steps
 
-- 📖 **[Read Full Docs](https://github.com/pavansharan007/skeleton-ui-loader)**
 - 🎮 **[Try Live Demo](https://skeletonuiloader.vercel.app/)**
 - 💬 **[GitHub Issues](https://github.com/pavansharan007/skeleton-ui-loader/issues)** for bugs or ideas
 - ⭐ **[Star on GitHub](https://github.com/pavansharan007/skeleton-ui-loader)** if this saved you time
