@@ -1,6 +1,6 @@
 {
   "name": "skeleton-ui-loader",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Zero-config React skeleton loader generated from real DOM structure.",
   "author": "Pavan",
   "license": "MIT",
