@@ -12,10 +12,10 @@ Stop writing skeleton markup. Wrap your component → instant, perfect skeleton.
 
 ## The Problem
 
-Every React app needs skeleton loaders. But building them sucks:
+Every React app needs skeleton loaders, but building and maintaining them takes time:
 
 ```tsx
-// ❌ You write this for every component
+// Manual skeleton markup for each component
 const UserCardSkeleton = () => (
   <div className="animate-pulse">
     <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
@@ -40,7 +40,7 @@ Just wrap **ANY component or HTML element**:
 import { SkeletonAuto } from "skeleton-ui-loader";
 import "skeleton-ui-loader/styles.css";
 
-// ✅ Works with React components
+// Works with React components
 function UserCard({ loading }) {
   return (
     <SkeletonAuto loading={loading}>
@@ -49,7 +49,7 @@ function UserCard({ loading }) {
   );
 }
 
-// ✅ Works with any HTML structure
+// Works with any HTML structure
 function Article({ loading }) {
   return (
     <SkeletonAuto loading={loading}>
@@ -63,7 +63,7 @@ function Article({ loading }) {
   );
 }
 
-// ✅ Works with simple divs
+// Works with simple divs
 <SkeletonAuto loading={isLoading}>
   <div>
     <div className="avatar"></div>
@@ -72,20 +72,20 @@ function Article({ loading }) {
 </SkeletonAuto>
 ```
 
-Perfect skeleton, **zero maintenance**. Works with any div, any HTML structure.
+You get matching skeletons without maintaining duplicate markup. Works with any div or HTML structure.
 
 ---
 
 ## Works With ANYTHING
 
 ```tsx
-// ✅ React components
+// React components
 <SkeletonAuto loading={loading}><MyComponent /></SkeletonAuto>
 
-// ✅ HTML divs
+// HTML divs
 <SkeletonAuto loading={loading}><div>...</div></SkeletonAuto>
 
-// ✅ Nested structures
+// Nested structures
 <SkeletonAuto loading={loading}>
   <article>
     <h1>Title</h1>
@@ -94,7 +94,7 @@ Perfect skeleton, **zero maintenance**. Works with any div, any HTML structure.
   </article>
 </SkeletonAuto>
 
-// ✅ Complex layouts
+// Complex layouts
 <SkeletonAuto loading={loading}>
   <section className="card">
     <header>
@@ -111,18 +111,18 @@ Perfect skeleton, **zero maintenance**. Works with any div, any HTML structure.
 </SkeletonAuto>
 ```
 
-**One wrapper.** Any content inside. Perfect skeleton.
+One wrapper around your UI, and skeletons are generated from the real layout.
 
 ---
 
 ## Why skeleton-ui-loader
 
-✨ **Works with ANY HTML** — React components, divs, complex layouts, anything  
-🤖 **Auto-generated** — Scans real DOM, creates perfect skeleton  
-🎨 **Themeable** — Colors, radius, animations fully customizable  
-⚡ **Performant** — Snapshot mode caches layouts for repeat renders  
-🔄 **SSR-safe** — Works with Next.js, Remix, any React framework  
-⌨️ **TypeScript** — Full type safety & IntelliSense  
+- **Works with any HTML** — React components, divs, and complex layouts  
+- **Auto-generated** — scans real DOM and builds matching placeholders  
+- **Themeable** — colors, radius, and animations are customizable  
+- **Performant** — snapshot mode caches layouts for repeat renders  
+- **SSR-safe** — works with Next.js, Remix, and other React frameworks  
+- **TypeScript friendly** — includes type safety and IntelliSense support  
 
 ---
 
@@ -225,7 +225,7 @@ function ManualMode() {
 
 ## How It Works
 
-**The Magic:**
+What happens under the hood:
 
 1. **Scans** your real component's DOM
 2. **Classifies** elements (headings, images, text, buttons)
@@ -308,10 +308,10 @@ Use `snapshot` to cache layouts for components shown repeatedly:
 
 | Animation | Effect |
 |---|---|
-| `shimmer` | ✨ Light wave across skeleton (default) |
-| `pulse` | 💫 Fade in/out smoothly |
-| `wave` | 〰️ Directional highlight sweep |
-| `none` | ⏸️ Static (no animation) |
+| `shimmer` | Light wave across skeleton (default) |
+| `pulse` | Smooth fade in/out |
+| `wave` | Directional highlight sweep |
+| `none` | Static (no animation) |
 
 ```tsx
 <SkeletonAuto animation="pulse">
@@ -406,10 +406,10 @@ clearSnapshot();           // Clear all
 
 ## Performance Tips
 
-💡 **Use `snapshot`** for stable layouts shown 5+ times  
-💡 **Set `maxDepth` lower** on very deep component trees  
-💡 **Raise `minWidth`/`minHeight`** to skip micro-elements  
-💡 **Use `data-skeleton-id`** on key containers for reliable matching
+- Use `snapshot` for stable layouts shown frequently  
+- Set `maxDepth` lower on very deep component trees  
+- Raise `minWidth`/`minHeight` to skip micro-elements  
+- Use `data-skeleton-id` on key containers for reliable matching
 
 **Bundle size:** Only 3KB. Zero runtime dependencies.
 
@@ -440,9 +440,9 @@ MIT — Use freely in personal & commercial projects.
 
 ## Next Steps
 
-- 🎮 **[Try Live Demo](https://skeletonuiloader.vercel.app/)**
-- 💬 **[GitHub Issues](https://github.com/pavansharan007/skeleton-ui-loader/issues)** for bugs or ideas
-- ⭐ **[Star on GitHub](https://github.com/pavansharan007/skeleton-ui-loader)** if this saved you time
+- **[Try Live Demo](https://skeletonuiloader.vercel.app/)**
+- **[GitHub Issues](https://github.com/pavansharan007/skeleton-ui-loader/issues)** for bugs or ideas
+- **[Star on GitHub](https://github.com/pavansharan007/skeleton-ui-loader)** if this saved you time
 
 ---
 
